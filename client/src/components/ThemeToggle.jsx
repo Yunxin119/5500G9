@@ -28,7 +28,7 @@ const ThemeToggle = () => {
   };
 
   return (
-    <div className="w-44 justify-start fixed bottom-3 left-3">
+    <div className="w-44 justify-start fixed bottom-3 left-3 z-50">
       <Switch 
           checked={isDarkMode}
           onChange={toggleHandler}
