@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background: linear-gradient(rgba(213, 213, 213, 0.3), rgba(199, 199, 199, 0.1)), url("./assets/bg-light.JPG");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.dark body {
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url("./assets/bg-dark.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.company-card {
+  @apply relative overflow-hidden bg-gray-300 bg-opacity-30 hover:bg-opacity-60 shadow-sm rounded-lg p-3;
+}
+
+.dark .company-card {
+  @apply bg-gray-800 bg-opacity-40 hover:bg-opacity-60;
+}
+
+.btn-primary {
+  @apply bg-blue-500 bg-opacity-70 rounded-xl hover:bg-blue-700 hover:bg-opacity-80 px-3 py-2 text-white;
+}
+
+.edit {
+  @apply bg-gray-200 dark:bg-gray-600 dark:bg-opacity-50 w-full max-w-lg p-6 rounded-lg shadow-lg bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-50;
+}
+
+.glass-background {
+  @apply absolute inset-0;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  z-index: -1;
+}
+
+.prime-text {
+  @apply text-gray-800;
+}
+
+.dark .prime-text {
+  @apply text-gray-200;
+}
+
+.sec-text {
+  @apply text-gray-700;
+}
+
+.dark .sec-text {
+  @apply text-gray-400;
+}
+
+.input {
+  @apply placeholder-gray-200 dark:text-gray-300 text-gray-700 rounded-lg p-2 bg-gray-600 border-gray-300 border-[1px] bg-opacity-30 w-full h-10;
+}
+
+.select {
+  @apply placeholder-gray-200 dark:text-gray-300 text-gray-700 rounded-lg p-2 bg-gray-600 border-gray-300 border-[1px] bg-opacity-30 w-full h-10;
+}
+
+.form-control {
+  @apply flex flex-col gap-2
+}
+
+.label-text {
+  @apply text-gray-800 dark:text-gray-300;
+}
