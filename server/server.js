@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { connectDB } from './connectDB.js';
 export const app = express();
 const PORT = process.env.PORT || 5001;
+import userRoutes from './routes/UserRoutes.js';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,6 +24,8 @@ app.use(cors(corsOptions));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {
     connectDB();
