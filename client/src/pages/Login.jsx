@@ -21,7 +21,8 @@ const Login = () => {
       dispatch(setCredential(res));
       navigate('/');
     } catch (error) {
-      toast.error(error.data.message);
+      toast.error(error?.data?.message || "Login failed");
+      console.log(error);
     }
   };
 

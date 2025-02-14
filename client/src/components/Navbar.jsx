@@ -7,18 +7,25 @@ import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { Menu } from '@headlessui/react';
+import { useLogoutMutation } from '../redux/userApiSlice';
 
 const Navbar = () => {
   const { userInfo } = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [logoutUser] = useLogoutMutation();
 
   const handleSignOut = async () => {
-    dispatch(logout());
-    navigate('/');
-    toast.success('You have been signed out');
-    setIsOpen(false);
+    try {
+        const res = await logoutUser();
+        dispatch(logout());
+        navigate('/');
+        toast.success('You have been signed out');
+        setIsOpen(false);
+    } catch (error) {
+        toast.error('Failed to sign out, please try again');
+    }
   };
 
   return (
@@ -52,7 +59,7 @@ const Navbar = () => {
 
           <div className="flex items-center">
             {userInfo && <div className="hidden md:block">{/* <AddCompany /> */}</div>}
-            <div className="ml-4 flex items-center hidden md:block">
+            <div className={`ml-4 flex items-center ${userInfo ? "hidden md:block": ""}`}>
               {userInfo ? (
                 <Menu as="div" className="relative ml-3">
                   <Menu.Button className="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -146,7 +153,7 @@ const Navbar = () => {
                   </div>
                   <div className="ml-3">
                     <div className="text-base font-medium text-gray-200">{userInfo.name}</div>
-                    <div className="text-sm font-medium text-gray-400">{userInfo.email}</div>
+                    <div className="text-sm font-medium text-gray-300">{userInfo.email}</div>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 px-2">
