@@ -7,6 +7,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ThemeToggle from './components/ThemeToggle';
+import Profile from './pages/Profile';
+import CoverLetter from './pages/CoverLetter';
+
 function App() {
   const { userInfo } = useSelector((state) => state.authReducer)
   const isLoggedIn = userInfo !== null;
@@ -19,6 +22,8 @@ function App() {
         <Route path='/login' element={isLoggedIn ? <Home /> : <Login />} />
         <Route path='/register' element={isLoggedIn ? <Home /> : <Register />} />
         <Route path='/dashboard' element={isLoggedIn ? <Dashboard /> : <Login />} />
+        <Route path='/profile' element={isLoggedIn ? <Profile /> : <Login />} />
+        <Route path='/cover-letter' element={isLoggedIn ? <CoverLetter /> : <Login />} />
       </Routes>
       <ToastContainer />
     </div>

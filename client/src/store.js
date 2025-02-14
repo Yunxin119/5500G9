@@ -6,5 +6,7 @@ export default configureStore({
     reducer: {
         [apiSlice.reducerPath]: apiSlice.reducer,
         authReducer,
-    }
+    },
+    middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });

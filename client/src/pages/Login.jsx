@@ -4,17 +4,25 @@ import { useDispatch } from 'react-redux';
 import { setCredential } from '../redux/authReducer';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLoginMutation } from '../redux/userApiSlice';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [login, {isLoading}] = useLoginMutation();
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    dispatch(setCredential({ email, password }));
-    navigate('/');
+    try {
+      const res = await login({ email, password }).unwrap();
+      dispatch(setCredential(res));
+      navigate('/');
+    } catch (error) {
+      toast.error(error.data.message);
+    }
   };
 
   const containerVariants = {

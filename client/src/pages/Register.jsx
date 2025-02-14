@@ -3,11 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredential } from '../redux/authReducer';
 import { motion } from 'framer-motion';
+import { useRegisterMutation } from '../redux/userApiSlice';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [gender, setGender] = useState('');
+  const [register, {isLoading}] = useRegisterMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -38,10 +43,16 @@ const Register = () => {
     tap: { scale: 0.95 }
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    dispatch(setCredential({ email, password, username }));
-    navigate('/');
+    try {
+      const res = await register({ email, password, username, confirmPassword, gender }).unwrap();
+      dispatch(setCredential(res));
+      navigate('/');
+    } catch (error) {
+      toast.error("Registration failed");
+      console.error(error);
+    }
   };
 
 
@@ -122,6 +133,39 @@ const Register = () => {
                 whileHover={{ x: 5 }}
                 whileFocus={{ scale: 1.01 }}
               />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label className="label py-2">
+                <span>Confirm Password</span>
+              </label>
+              <motion.input
+                type="password"
+                placeholder="Shh... it's a secret"
+                className="input transition-all duration-300 hover:border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 mt-1"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                whileHover={{ x: 5 }}
+                whileFocus={{ scale: 1.01 }}
+              />
+            </motion.div>
+
+            {/* Form: Gender */}
+            <motion.div variants={itemVariants}>
+            <label className='label py-2'>
+                <span>Gender</span>
+            </label>
+            <select
+                className="input"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
+            >
+                <option value="" disabled>Select Gender</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Do not wish to answer</option>
+            </select>
             </motion.div>
 
             {/* Form: Login direction */}
