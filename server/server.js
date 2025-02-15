@@ -8,24 +8,28 @@ import { connectDB } from './connectDB.js';
 export const app = express();
 const PORT = process.env.PORT || 5001;
 import userRoutes from './routes/UserRoutes.js';
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// MARK: CORS
-const corsOptions = {
-    origin: true,
-    credentials: true,
-    optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
-
+import companyRoutes from './routes/CompanyRoutes.js';
 // MARK: middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// MARK: CORS
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+        ? process.env.FRONTEND_URL 
+        : 'http://localhost:3000',
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+
 app.use('/api/users', userRoutes);
+app.use('/api/companies', companyRoutes);
 
 app.listen(PORT, () => {
     connectDB();

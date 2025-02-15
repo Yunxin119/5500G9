@@ -1,9 +1,14 @@
 import React from 'react'
+import Navbar from '../components/Navbar'
+import CompanyGrid from '../components/dashboard/CompanyGrid'
 
-const DashBoard = () => {
+const Dashboard = () => {
   return (
-    <div>DashBoard</div>
+    <div className='screen'>
+        <Navbar />
+        <CompanyGrid />
+    </div>
   )
 }
 
-export default DashBoard
+export default Dashboard

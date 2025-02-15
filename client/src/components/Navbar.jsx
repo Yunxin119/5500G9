@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { Menu } from '@headlessui/react';
 import { useLogoutMutation } from '../redux/userApiSlice';
+import AddCompany from './AddCompany';
 
 const Navbar = () => {
   const { userInfo } = useSelector((state) => state.authReducer);
@@ -58,7 +59,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center">
-            {userInfo && <div className="hidden md:block">{/* <AddCompany /> */}</div>}
+            {userInfo && <div className="hidden md:block"><AddCompany /></div>}
             <div className={`ml-4 flex items-center ${userInfo ? "hidden md:block": ""}`}>
               {userInfo ? (
                 <Menu as="div" className="relative ml-3">
@@ -158,9 +159,9 @@ const Navbar = () => {
                 </div>
                 <div className="mt-3 space-y-1 px-2">
                   {/* AddCompany placeholder */}
-                  {/* <div className="px-3 py-2">
+                  <div className="px-3 py-2">
                     <AddCompany />
-                  </div> */}
+                  </div>
                   <Link
                     to="/profile"
                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-200 hover:bg-gray-700 hover:text-white"
