@@ -77,7 +77,7 @@ export default function PersonalInfo({ isCurrentUser, user }) {
 
     return (
         <motion.div
-        className="w-[60%] shadow sm:rounded-lg"
+        className="w-full md:w-[60%] shadow sm:rounded-lg"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -105,6 +105,7 @@ export default function PersonalInfo({ isCurrentUser, user }) {
             )}
             </div>
             <motion.p 
+            className="mt-1 max-w-2xl text-sm/6 sec-text"
             className="mt-1 max-w-2xl text-sm/6 text-gray-500"
             variants={itemVariants}
             >

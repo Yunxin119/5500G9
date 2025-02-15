@@ -23,7 +23,7 @@ function App() {
         <Route path='/register' element={isLoggedIn ? <Home /> : <Register />} />
         <Route path='/dashboard' element={isLoggedIn ? <Dashboard /> : <Login />} />
         <Route path='/profile' element={isLoggedIn ? <Profile /> : <Login />} />
-        <Route path='/cover-letter' element={isLoggedIn ? <CoverLetter /> : <Login />} />
+        <Route path='/cover-letter' element={isLoggedIn ? <CoverLetter currentUser={userInfo} /> : <Login />} />
       </Routes>
       <ToastContainer />
     </div>

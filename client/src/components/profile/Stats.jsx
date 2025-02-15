@@ -34,7 +34,7 @@ const Stats = ({ user, isCurrentUser }) => {
 
   return (
     <motion.div
-      className="h-full w-1/2 rounded-md flex flex-col items-center justify-between"
+      className="h-full w-full md:w-1/2 rounded-md flex flex-col items-center justify-center md:justify-between"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -42,7 +42,7 @@ const Stats = ({ user, isCurrentUser }) => {
       <motion.img
         src={user.profilePic}
         alt=""
-        className="h-32 w-32 rounded-full mb-4"
+        className="h-20 md:h-32 w-20 md:w-32 mt-12 md:mt-0 rounded-full mb-4"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -54,30 +54,30 @@ const Stats = ({ user, isCurrentUser }) => {
       >
         {isCurrentUser ? (
           <>
-            <div className="text-md md:text-lg text-gray-200">
+            <div className="text-md md:text-lg prime-text">
               Hi, <span className="font-bold text-blue-600 dark:text-blue-400">{user.username}</span>!
             </div>
-            <div className="text-md md:text-md text-gray-200">
+            <div className="text-md md:text-md prime-text">
               You have made <span className="text-blue-600 font-bold dark:text-blue-400">{validCompanies}</span> applications
             </div>
           </>
         ) : (
-          <div className="text-md md:text-lg text-gray-200">
+          <div className="text-md md:text-lg prime-text">
             {user.username} has applied to {validCompanies} companies
           </div>
         )}
       </motion.div>
 
-      <motion.div variants={containerVariants}>
+      <motion.div variants={containerVariants} className="mb-16 md:mb-0">
         {statsData.map((stat, index) => (
           <motion.div
             key={stat.label}
-            className="grid grid-cols-2 space-x-4"
+            className="grid grid-cols-2 space-x-4 mb-1 md:mb-0"
             variants={itemVariants}
           >
-            <div className="text-md md:text-lg text-gray-200">{stat.label}</div>
-            <div className="text-md md:text-lg sec-text">
-              {stat.value} <span className="text-md md:text-lg text-gray-200">/ {validCompanies}</span>
+            <div className="text-md md:text-lg prime-text">{stat.label}</div>
+            <div className="text-md md:text-lg text-blue-500">
+              {stat.value} <span className="text-md md:text-lg prime-text">/ {validCompanies}</span>
             </div>
           </motion.div>
         ))}
