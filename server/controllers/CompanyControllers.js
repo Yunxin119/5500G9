@@ -1,6 +1,6 @@
-import Company from "../models/CompanyModel.js";
+import Company from "../models/Company.js";
 import url from "url";
-import User from "../models/UserModel.js";
+import User from "../models/User.js";
 import axios from "axios";
 
 // @DESC: Get all companies for a specific user

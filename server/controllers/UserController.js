@@ -19,59 +19,121 @@ export const register = async (req, res) => {
     try {
         const { username, password, confirmPassword, email, gender } = req.body;
 
-        if (await User.findOne({ username })) {
-            return res.status(400).json({ msg: "User already exists" });
+        // Input validation
+        if (!username || !password || !email || !gender) {
+            return res.status(400).json({ message: "All fields are required" });
         }
 
+        // Check if user already exists
+        const existingUser = await User.findOne({ 
+            $or: [{ username }, { email }] 
+        });
+        
+        if (existingUser) {
+            return res.status(400).json({ 
+                message: existingUser.username === username 
+                    ? "Username already exists" 
+                    : "Email already exists" 
+            });
+        }
+
+        // Validate password match
         if (password !== confirmPassword) {
-            return res.status(400).json({ msg: "Passwords do not match" });
+            return res.status(400).json({ message: "Passwords do not match" });
         }
 
-        const maleProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-        const femaleProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
-        const profilePic = `https://avatar.iran.liara.run/public/username=${username}`;
+        // Validate password strength
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+
+        // Generate profile picture URL based on gender
+        const profilePic = gender === "male" 
+            ? `https://avatar.iran.liara.run/public/boy?username=${username}`
+            : gender === "female" 
+                ? `https://avatar.iran.liara.run/public/girl?username=${username}`
+                : `https://avatar.iran.liara.run/public/username=${username}`;
 
         // Create new user instance
         const newUser = new User({
             username,
             email,
             gender,
-            profilePic: gender === "male" ? maleProfilePic : gender === "female" ? femaleProfilePic : profilePic
+            profilePic,
+            isVerified: false,
+            applications: []
         });
 
-        // Set the hashed password using the method defined in the schema
+        // Hash and set the password
         await newUser.setPassword(password);
 
         // Save the new user
-        await newUser.save();
+        const savedUser = await newUser.save();
 
-        const token = generateTokenAndCookie(newUser._id, res);
-        newUser.token = token;
-        
-        res.status(201).json(newUser.toJSON());
+        // Generate token and set cookie
+        const token = generateTokenAndCookie(savedUser._id, res);
+
+        // Prepare response data
+        const userData = {
+            _id: savedUser._id,
+            username: savedUser.username,
+            email: savedUser.email,
+            gender: savedUser.gender,
+            profilePic: savedUser.profilePic,
+            isVerified: savedUser.isVerified,
+            token
+        };
+
+        // Send success response
+        res.status(201).json(userData);
+
     } catch (error) {
-        console.log(error);
-        res.status(400).json({ msg: error.message });
+        console.error('Registration error:', error);
+        
+        // Handle specific MongoDB errors
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                message: "Username or email already exists" 
+            });
+        }
+
+        res.status(500).json({ 
+            message: "Error registering user", 
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 
-// Login an existing user
+// loginUser controller
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
         if (!user) return res.status(401).json({ msg: "User not found" });
 
         const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) return res.status(401).json({ msg: "Invalid email or password" });
+        
+        if (user && (isMatch)) {
+            const token = generateTokenAndCookie(user._id, res);
+            
+            console.log('Setting cookie in response:', {
+                token,
+                cookieHeader: res.getHeader('Set-Cookie')
+            });
 
-        const token = generateTokenAndCookie(user._id, res);
-        user.token = token;
-        console.log("User logged in");
-        res.status(200).json(user.toJSON());
+            res.json({
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                token
+            });
+        } else {
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Server error during login' });
     }
 };
 

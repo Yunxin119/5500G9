@@ -7,7 +7,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: (body) => ({
                 url: USERS_URL + '/login',
                 method: 'POST',
-                body
+                body,
+                credentials: 'include'
             }),
             invalidatesTags: ['User']
         }),
@@ -15,20 +16,23 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: (body) => ({
                 url: USERS_URL + '/register',
                 method: 'POST',
-                body
+                body,
+                credentials: 'include'
             }),
             invalidatesTags: ['User']
         }),
         logout: builder.mutation({
             query: () => ({
                 url: USERS_URL + '/logout',
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include'
             }),
             invalidatesTags: ['User'],
         }),
         getProfile: builder.query({
             query: (id) => ({
                 url: USERS_URL + '/' + id,
+                credentials: 'include'  // Added credentials
             }),
             providesTags: ['User'],
             keepUnusedDataFor: 5,
@@ -37,13 +41,15 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: (body) => ({
                 url: USERS_URL + '/'+ body.id,
                 method: 'PUT',
-                body
+                body,
+                credentials: 'include'  // Added credentials
             }),
             invalidatesTags: ['User']
         }),
         getAllUsers: builder.query({
             query: () => ({
                 url: USERS_URL,
+                credentials: 'include'  // Added credentials
             }),
             providesTags: ['User'],
             keepUnusedDataFor: 5,
@@ -51,6 +57,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         getUserProfile: builder.query({
             query: (id) => ({
                 url: USERS_URL + '/'+id,
+                credentials: 'include'  // Added credentials
             }),
             providesTags: ['User'],
             keepUnusedDataFor: 5,
@@ -58,7 +65,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
         deleteUser: builder.mutation({
             query: (id) => ({
                 url: USERS_URL + '/'+id,
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'include'  // Added credentials
             }),
             invalidatesTags: ['User']
         }),
@@ -66,7 +74,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: (body) => ({
                 url: USERS_URL + '/send-verification-email',
                 method: 'POST',
-                body
+                body,
+                credentials: 'include'  // Added credentials
             }),
             invalidatesTags: ['User'],
         }),
@@ -74,21 +83,23 @@ export const userApiSlice = apiSlice.injectEndpoints({
             query: ({ token }) => ({
                 url: USERS_URL + `/verify/verify-email?token=${token}`,
                 method: 'GET',
+                credentials: 'include'  // Added credentials
             }),
             invalidatesTags: ['User'],
         }),
     })
 });
 
-export const { 
-    useLoginMutation, 
-    useRegisterMutation, 
-    useLogoutMutation, 
-    useGetProfileQuery, 
+export const {
+    useLoginMutation,
+    useRegisterMutation,
+    useLogoutMutation,
+    useGetProfileQuery,
     useUpdateProfileMutation,
     useGetAllUsersQuery,
     useDeleteUserMutation,
     useSendVerificationEmailMutation,
     useVerifyUserEmailMutation,
 } = userApiSlice;
+
 export default userApiSlice;
