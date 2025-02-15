@@ -70,3 +70,24 @@ body {
 .label-text {
   @apply text-gray-800 dark:text-gray-300;
 }
+
+.text-area {
+  @apply placeholder-gray-200 dark:text-gray-300 text-gray-700 rounded-lg p-2 bg-gray-600 border-gray-300 border-[1px] bg-opacity-30 w-full;
+  resize: none;
+}
+
+.hint {
+  @apply text-gray-500;
+}
+
+.dark .hint {
+  @apply text-gray-300;
+}
+
+.placeholder {
+  @apply placeholder-gray-600;
+}
+
+.dark .placeholder {
+  @apply placeholder-gray-300;
+}
