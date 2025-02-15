@@ -106,6 +106,7 @@ export default function PersonalInfo({ isCurrentUser, user }) {
             </div>
             <motion.p 
             className="mt-1 max-w-2xl text-sm/6 sec-text"
+            className="mt-1 max-w-2xl text-sm/6 text-gray-500"
             variants={itemVariants}
             >
             Personal details and application stats.
