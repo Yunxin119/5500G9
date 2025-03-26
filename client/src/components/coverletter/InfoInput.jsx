@@ -1,10 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiFileText, FiBriefcase, FiUploadCloud, FiFile, FiX } from 'react-icons/fi';
+import { useProcessPdfMutation } from '../../redux/userApiSlice';
+import { toast } from 'react-toastify';
 
-const InfoInput = ({ setResume, setJd }) => {
+const InfoInput = ({ setResume, setJd, setPdfText }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [processPdf] = useProcessPdfMutation();
   const fileInputRef = useRef(null);
 
   const containerVariants = {
@@ -51,24 +55,47 @@ const InfoInput = ({ setResume, setJd }) => {
     handleFile(file);
   };
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (file && (file.type === 'application/pdf' || file.type === 'application/msword' || 
         file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
       setUploadedFile(file);
-      // Here you would typically read the file and set the resume
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setResume(e.target.result);
-      };
-      reader.readAsText(file);
+      setIsUploading(true);
+      
+      try {
+        // Create FormData to send file to server
+        const formData = new FormData();
+        formData.append('pdfFile', file);
+        
+        // Send the file to the server for processing
+        const response = await processPdf(formData).unwrap();
+        
+        // Set the extracted text from PDF
+        if (response && response.text) {
+          setResume(response.text);
+          setPdfText(response.text);
+          toast.success('PDF processed successfully');
+        }
+      } catch (error) {
+        console.error('Error processing PDF:', error);
+        toast.error('Failed to process PDF. Please try again.');
+        // If server processing fails, fallback to client-side text extraction
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setResume(e.target.result);
+        };
+        reader.readAsText(file);
+      } finally {
+        setIsUploading(false);
+      }
     } else {
-      alert('Please upload a PDF or Word document');
+      toast.error('Please upload a PDF or Word document');
     }
   };
 
   const removeFile = () => {
     setUploadedFile(null);
     setResume('');
+    setPdfText('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -105,7 +132,9 @@ const InfoInput = ({ setResume, setJd }) => {
             className={`relative border-2 border-dashed rounded-lg p-6 transition-all duration-300
                       ${isDragging 
                         ? 'border-blue-500 bg-blue-500/10' 
-                        : 'border-gray-200 bg-gray-500/50 backdrop-blur-md hover:border-blue-500/50'} 
+                        : isUploading
+                          ? 'border-yellow-500 bg-yellow-500/10'
+                          : 'border-gray-200 bg-gray-500/50 backdrop-blur-md hover:border-blue-500/50'} 
                       backdrop-blur-md hover:border-blue-500/50`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -144,9 +173,16 @@ const InfoInput = ({ setResume, setJd }) => {
                 <button
                   onClick={removeFile}
                   className="p-1 hover:bg-gray-700 rounded-full transition-colors duration-200"
+                  disabled={isUploading}
                 >
                   <FiX className="w-5 h-5 sec-text hover:sec-text" />
                 </button>
+              </div>
+            )}
+            
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-800/70 rounded-lg">
+                <div className="text-blue-500 text-sm">Processing PDF...</div>
               </div>
             )}
           </div>
@@ -163,7 +199,7 @@ const InfoInput = ({ setResume, setJd }) => {
                        focus:ring-blue-500/20 focus:outline-none transition-all duration-300
                        sec-text placeholder'
             placeholder='Paste the job description here...'
-            rows={10}
+            rows={13}
             onChange={(e) => setJd(e.target.value)}
           />
         </div>
