@@ -87,6 +87,23 @@ export const userApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
+        processPdf: builder.mutation({
+            query: (formData) => ({
+                url: USERS_URL + '/process-pdf',
+                method: 'POST',
+                body: formData,
+                formData: true,
+                credentials: 'include'
+            }),
+        }),
+        generateCoverLetter: builder.mutation({
+            query: (body) => ({
+                url: USERS_URL + '/generate-cover-letter',
+                method: 'POST',
+                body,
+                credentials: 'include'
+            }),
+        }),
     })
 });
 
@@ -100,6 +117,8 @@ export const {
     useDeleteUserMutation,
     useSendVerificationEmailMutation,
     useVerifyUserEmailMutation,
+    useProcessPdfMutation,
+    useGenerateCoverLetterMutation,
 } = userApiSlice;
 
 export default userApiSlice;
