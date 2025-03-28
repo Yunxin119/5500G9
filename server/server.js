@@ -6,7 +6,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './connectDB.js';
 export const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = 10210;
 import userRoutes from './routes/UserRoutes.js';
 import companyRoutes from './routes/CompanyRoutes.js';
 // MARK: middleware
@@ -18,7 +18,7 @@ app.use(cookieParser());
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
         ? process.env.FRONTEND_URL 
-        : 'http://localhost:3000',
+        : 'http://localhost:3001',
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
