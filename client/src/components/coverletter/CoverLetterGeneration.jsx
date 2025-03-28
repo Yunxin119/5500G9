@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiDownload, FiCopy, FiCheck, FiPlus } from 'react-icons/fi'; // Added FiBriefcase
 import ReactMarkdown from 'react-markdown';
-import { useGenerateCoverLetterMutation } from '../../redux/userApiSlice';
+import { useGenerateCoverLetterMutation, useExtractJobInfoMutation } from '../../redux/userApiSlice';
 import { toast } from 'react-toastify';
 import html2pdf from 'html2pdf.js';
+import AddCompany from '../AddCompany'; // Import the AddCompany component
 
 const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
   const [coverLetter, setCoverLetter] = useState('');
   const [loading, setLoading] = useState(false);
+  const [extractingJobInfo, setExtractingJobInfo] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [jobInfo, setJobInfo] = useState({});
+  
   const [generateCoverLetter] = useGenerateCoverLetterMutation();
+  const [extractJobInfo] = useExtractJobInfoMutation();
   const markdownRef = React.useRef(null);
 
   const containerVariants = {
@@ -77,6 +83,29 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
         console.error('Failed to copy:', err);
         toast.error('Failed to copy to clipboard');
       });
+  };
+
+  // Add new handler for opening the job application modal
+  const handleOpenApplicationModal = async () => {
+    if (!jd) {
+      toast.error('Job description is required');
+      return;
+    }
+
+    setExtractingJobInfo(true);
+    try {
+      const response = await extractJobInfo({ jobDescription: jd }).unwrap();
+      setJobInfo(response);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Failed to extract job information:', error);
+      toast.error('Failed to extract job details, please fill them manually');
+      // Open modal with empty data even if extraction fails
+      setJobInfo({});
+      setIsModalOpen(true);
+    } finally {
+      setExtractingJobInfo(false);
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -237,8 +266,32 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
             {copied ? <FiCheck className="w-5 h-5 text-green-500" /> : <FiCopy className="w-5 h-5" />}
             <span>{copied ? 'Copied!' : 'Copy to Clipboard'}</span>
           </motion.button>
+          
+          {/* New Apply Now button */}
+          <motion.button
+            onClick={handleOpenApplicationModal}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            disabled={extractingJobInfo}
+            className='flex-1 p-3 bg-green-600/80 text-white rounded-lg
+                      font-medium shadow-lg shadow-green-500/20 flex items-center justify-center
+                      space-x-2 hover:bg-green-700/80 hover:shadow-xl hover:shadow-green-500/30
+                      transition-all duration-300'
+          >
+            <FiPlus className="w-5 h-5" />
+            <span>{extractingJobInfo ? 'Analyzing...' : 'Add to Application'}</span>
+          </motion.button>
         </motion.div>
       )}
+      
+      {/* Use the updated AddCompany component */}
+      <AddCompany 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        initialData={jobInfo} 
+        hideButton={true}
+      />
     </motion.div>
   );
 };

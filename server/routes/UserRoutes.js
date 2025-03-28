@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { getAllUsers, register, login, logout, getUserProfile, deleteUser, editProfile, verifyEmail, sendVerificationEmail, generateCoverLetter, processPdf } from '../controllers/UserController.js';
+import { getAllUsers, register, login, logout, getUserProfile, deleteUser, editProfile, verifyEmail, sendVerificationEmail, generateCoverLetter, processPdf, extractJobInfo } from '../controllers/UserController.js';
 import multer from 'multer';
 import path from 'path';
 
@@ -48,5 +48,6 @@ router.route("/send-verification-email").post(sendVerificationEmail);
 router.route("/verify/verify-email").get(verifyEmail);
 router.route("/generate-cover-letter").post(generateCoverLetter);
 router.route("/process-pdf").post(upload.single('pdfFile'), processPdf);
+router.route('/extract-job-info').post(extractJobInfo);
 
 export default router;
