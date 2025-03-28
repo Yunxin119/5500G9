@@ -95,7 +95,7 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
       // Apply styles directly to paragraph elements
       const paragraphs = tempDiv.querySelectorAll('p');
       paragraphs.forEach(p => {
-        p.style.marginBottom = '20pt';
+        p.style.marginBottom = '16pt';
       });
       
       // Apply styles to headings
@@ -179,13 +179,13 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
             <style>
               {`
               .markdown-content p {
-                margin-bottom: 1.5em;
+                margin-bottom: 1em;
               }
               .markdown-content h1, 
               .markdown-content h2, 
               .markdown-content h3, 
               .markdown-content h4 {
-                margin-top: 1.5em;
+                margin-top: 1em;
                 margin-bottom: 1em;
               }
               .markdown-content strong {
