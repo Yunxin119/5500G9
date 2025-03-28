@@ -4,8 +4,7 @@ import { FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import { useGenerateCoverLetterMutation } from '../../redux/userApiSlice';
 import { toast } from 'react-toastify';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import html2pdf from 'html2pdf.js';
 
 const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
   const [coverLetter, setCoverLetter] = useState('');
@@ -85,30 +84,30 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
       toast.error('No cover letter to download');
       return;
     }
-
+    
     try {
-      const element = markdownRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      });
+      // Create a temporary div with proper styling
+      const tempDiv = document.createElement('div');
+      tempDiv.className = 'p-6 max-w-none bg-white text-black';
+      tempDiv.innerHTML = markdownRef.current.innerHTML;
+      tempDiv.style.fontSize = '12pt'; // PDF points
+      document.body.appendChild(tempDiv);
       
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: 'a4'
-      });
+      // Configure PDF options
+      const opt = {
+        margin: [20, 20, 20, 20], // [top, left, bottom, right]
+        filename: 'cover-letter.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all'] }
+      };
       
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      // Generate PDF
+      await html2pdf().from(tempDiv).set(opt).save();
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('cover-letter.pdf');
-      
+      // Clean up
+      document.body.removeChild(tempDiv);
       toast.success('PDF downloaded successfully!');
     } catch (error) {
       console.error('Failed to download PDF:', error);
@@ -153,13 +152,14 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
       >
         {coverLetter ? (
           <div 
-            ref={markdownRef}
-            className="p-6 prose prose-invert prose-blue max-w-none h-[500px] overflow-y-auto sec-text markdown-content"
-          >
-            <ReactMarkdown>
-              {coverLetter}
-            </ReactMarkdown>
-          </div>
+          ref={markdownRef}
+          className="p-6 prose prose-invert prose-blue max-w-none h-[500px] overflow-y-auto sec-text markdown-content"
+          style={{ wordWrap: 'break-word' }}
+        >
+          <ReactMarkdown>
+            {coverLetter}
+          </ReactMarkdown>
+        </div>
         ) : (
           <div className="p-6 h-[500px] overflow-y-auto flex items-center justify-center text-center">
             <p className="sec-text text-gray-400">
