@@ -435,7 +435,7 @@ export const generateCoverLetter = async (req, res) => {
             The cover letter should be personalized, professional, and persuasive. 
             Include a proper greeting, introduction, body paragraphs that demonstrate value, and a conclusion with a call to action.
             
-            Format the cover letter using Markdown for better readability.
+            Format the cover letter using Markdown for better readability. IMPORTANT: Use double line breaks (empty lines) between different sections of the cover letter to ensure proper spacing when displayed.
         `;
 
         try {
@@ -453,6 +453,11 @@ export const generateCoverLetter = async (req, res) => {
             // Extract the generated cover letter
             const coverLetter = completion.choices[0].message.content;
             console.log("Cover letter generated successfully");
+            // Log the raw cover letter content for debugging
+            console.log("========= RAW COVER LETTER CONTENT =========");
+            console.log(coverLetter);
+            console.log("===========================================");
+            fs.writeFileSync('cover-letter-debug.md', coverLetter, 'utf8');
 
             // Return the generated cover letter
             res.status(200).json({ coverLetter });

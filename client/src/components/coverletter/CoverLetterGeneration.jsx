@@ -91,6 +91,26 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
       tempDiv.className = 'p-6 max-w-none bg-white text-black';
       tempDiv.innerHTML = markdownRef.current.innerHTML;
       tempDiv.style.fontSize = '12pt'; // PDF points
+      
+      // Apply styles directly to paragraph elements
+      const paragraphs = tempDiv.querySelectorAll('p');
+      paragraphs.forEach(p => {
+        p.style.marginBottom = '20pt';
+      });
+      
+      // Apply styles to headings
+      const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headings.forEach(h => {
+        h.style.marginTop = '20pt';
+        h.style.marginBottom = '12pt';
+      });
+      
+      // Make strong elements actually bold
+      const boldElements = tempDiv.querySelectorAll('strong');
+      boldElements.forEach(el => {
+        el.style.fontWeight = '700';
+      });
+      
       document.body.appendChild(tempDiv);
       
       // Configure PDF options
@@ -155,11 +175,28 @@ const CoverLetterGeneration = ({ resume, jd, pdfText }) => {
           ref={markdownRef}
           className="p-6 prose prose-invert prose-blue max-w-none h-[500px] overflow-y-auto sec-text markdown-content"
           style={{ wordWrap: 'break-word' }}
-        >
-          <ReactMarkdown>
-            {coverLetter}
-          </ReactMarkdown>
-        </div>
+          >
+            <style>
+              {`
+              .markdown-content p {
+                margin-bottom: 1.5em;
+              }
+              .markdown-content h1, 
+              .markdown-content h2, 
+              .markdown-content h3, 
+              .markdown-content h4 {
+                margin-top: 1.5em;
+                margin-bottom: 1em;
+              }
+              .markdown-content strong {
+                font-weight: 700;
+              }
+              `}
+            </style>
+            <ReactMarkdown>
+              {coverLetter}
+            </ReactMarkdown>
+          </div>
         ) : (
           <div className="p-6 h-[500px] overflow-y-auto flex items-center justify-center text-center">
             <p className="sec-text text-gray-400">
