@@ -457,7 +457,7 @@ export const generateCoverLetter = async (req, res) => {
             console.log("========= RAW COVER LETTER CONTENT =========");
             console.log(coverLetter);
             console.log("===========================================");
-            fs.writeFileSync('cover-letter-debug.md', coverLetter, 'utf8');
+            // fs.writeFileSync('cover-letter-debug.md', coverLetter, 'utf8');
 
             // Return the generated cover letter
             res.status(200).json({ coverLetter });
