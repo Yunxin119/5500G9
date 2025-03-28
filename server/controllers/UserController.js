@@ -3,6 +3,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import generateTokenAndCookie from "../middleware/generateTokenAndCookie.js";
 import nodemailer from "nodemailer";
+import OpenAI from "openai";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { PDFExtract } from 'pdf.js-extract';
+
+// Initialize DeepSeek client using OpenAI SDK
+const deepseek = new OpenAI({
+    baseURL: 'https://api.deepseek.com/v1',
+    apiKey: process.env.DEEPSEEK_API_KEY || "sk-d2ba0e552cd4424aa7e68ffe7b1544da"
+});
+
+// Initialize PDF extractor
+const pdfExtract = new PDFExtract();
+const extractOptions = {}; // default options
 
 // Function to get all users
 export const getAllUsers = async (req, res) => {
@@ -283,5 +298,203 @@ export const sendVerificationEmail = async (req, res) => {
     } catch (error) {
         console.error("Error sending email:", error);
         res.status(500).json({ msg: "Failed to send verification email" });
+    }
+};
+
+// Process uploaded PDF file and extract text
+export const processPdf = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No PDF file uploaded" });
+        }
+
+        // Use pdf.js-extract to extract text
+        try {
+            const data = await pdfExtract.extract(req.file.path, extractOptions);
+            
+            // Concatenate all page content
+            let extractedText = '';
+            if (data && data.pages) {
+                data.pages.forEach(page => {
+                    if (page.content) {
+                        page.content.forEach(item => {
+                            extractedText += item.str + ' ';
+                        });
+                        extractedText += '\n\n'; // Add line breaks between pages
+                    }
+                });
+            }
+            
+            // Extract metadata
+            const metadata = {
+                pageCount: data.pages.length,
+                info: data.meta || {}
+            };
+            
+            // Remove the temporary file
+            fs.unlinkSync(req.file.path);
+            
+            return res.status(200).json({
+                message: "PDF processed successfully",
+                text: extractedText.trim(),
+                metadata
+            });
+        } catch (pdfError) {
+            console.error('PDF extraction error:', pdfError);
+            
+            // Fallback for non-PDF files or if extraction fails
+            if (req.file.mimetype === 'application/msword' || 
+                req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                
+                // For Word documents, we'll need to send back a message
+                // since we don't have a direct extraction method here
+                fs.unlinkSync(req.file.path);
+                
+                return res.status(200).json({
+                    message: "Document processed. Note: Text extraction from Word documents is limited.",
+                    text: "Word document content. Please consider uploading a PDF for better results.",
+                    metadata: { type: req.file.mimetype }
+                });
+            }
+            
+            throw pdfError;
+        }
+    } catch (error) {
+        console.error('Error processing PDF:', error);
+        
+        // Remove the temporary file if it exists
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+        
+        res.status(500).json({
+            message: "Failed to process PDF file",
+            error: process.env.NODE_ENV === 'development' ? error.message : "Server error"
+        });
+    }
+};
+
+// Generate a cover letter using DeepSeek API
+export const generateCoverLetter = async (req, res) => {
+    try {
+        let { resume, jobDescription, pdfText } = req.body;
+        
+        // If pdfText is provided, use it instead of resume text
+        if (pdfText) {
+            resume = pdfText;
+        }
+        
+        if (!resume || !jobDescription) {
+            return res.status(400).json({ message: "Resume and job description are required" });
+        }
+
+        console.log("Starting cover letter generation with DeepSeek API");
+        console.log(`API Key: ${process.env.DEEPSEEK_API_KEY ? "Available" : "Not available"}`);
+        
+
+        const estimateTokens = (text) => Math.ceil(text.length / 4);
+        
+        const resumeTokens = estimateTokens(resume);
+        const jobDescriptionTokens = estimateTokens(jobDescription);
+        
+        console.log(`estimated tokens, resule: ${resumeTokens}, jd: ${jobDescriptionTokens}`);
+        
+        const MAX_TOTAL_TOKENS = 40000;
+        const MAX_TOKENS_PER_SECTION = 20000;
+        
+        if (resumeTokens + jobDescriptionTokens > MAX_TOTAL_TOKENS) {
+            const ratio = resumeTokens / (resumeTokens + jobDescriptionTokens);
+            const maxResumeTokens = Math.min(Math.floor(MAX_TOTAL_TOKENS * ratio), MAX_TOKENS_PER_SECTION);
+            const maxJobDescTokens = Math.min(MAX_TOTAL_TOKENS - maxResumeTokens, MAX_TOKENS_PER_SECTION);
+            
+            if (resumeTokens > maxResumeTokens) {
+                const charLimit = maxResumeTokens * 4;
+                resume = resume.substring(0, charLimit) + "... [Content too long, auto-truncated]";
+            }
+            
+            if (jobDescriptionTokens > maxJobDescTokens) {
+                const charLimit = maxJobDescTokens * 4;
+                jobDescription = jobDescription.substring(0, charLimit) + "... [Content too long, auto-truncated]";
+            }
+        }
+        
+        // Prepare the prompt for cover letter generation
+        const prompt = `
+            Generate a professional cover letter based on the following resume and job description.
+            
+            RESUME:
+            ${resume}
+            
+            JOB DESCRIPTION:
+            ${jobDescription}
+            
+            Please create a well-structured cover letter that highlights the relevant skills and experiences from the resume that match the job requirements.
+            Please only include the cover letter, no other text. Please do not include any other text like "Here is the cover letter" or "Cover letter:" or anything like that.
+            Please try to get the information like contact info and others from the resume and job description, try not to leave any blank. So user can copy and use it directly.
+            Tailor user's experience to the job description.
+            The cover letter should be personalized, professional, and persuasive. 
+            Include a proper greeting, introduction, body paragraphs that demonstrate value, and a conclusion with a call to action.
+            
+            Format the cover letter using Markdown for better readability.
+        `;
+
+        try {
+            // Call DeepSeek API
+            const completion = await deepseek.chat.completions.create({
+                messages: [
+                    { role: "system", content: "You are a professional cover letter writer with expertise in crafting compelling, tailored cover letters that help job applicants stand out." },
+                    { role: "user", content: prompt }
+                ],
+                model: "deepseek-chat",
+                max_tokens: 2000,
+                temperature: 0.7,
+            });
+
+            // Extract the generated cover letter
+            const coverLetter = completion.choices[0].message.content;
+            console.log("Cover letter generated successfully");
+
+            // Return the generated cover letter
+            res.status(200).json({ coverLetter });
+        } catch (apiError) {
+            console.error('DeepSeek API Error:', apiError);
+            
+            // If there's an API error, try to provide a simple cover letter as fallback
+            const fallbackCoverLetter = `
+# Professional Cover Letter
+
+Dear Hiring Manager,
+
+I am writing to express my strong interest in the position as advertised. After reviewing the job description, I believe my skills and experiences align well with your requirements.
+
+## Why I'm a Good Fit
+
+Based on my resume, I have developed relevant skills that would be valuable for this role. I am confident that I can make a positive contribution to your team.
+
+## My Interest in This Role
+
+The opportunity to work with your organization particularly appeals to me because of its reputation and the chance to apply my expertise in a new environment.
+
+## Closing
+
+I would welcome the opportunity to discuss my qualifications further. Thank you for considering my application.
+
+Sincerely,
+[Your Name]
+`;
+
+            console.log("Using fallback cover letter due to API error");
+            res.status(200).json({ 
+                coverLetter: fallbackCoverLetter,
+                isApiError: true,
+                message: "Failed to generate cover letter, using fallback template"
+            });
+        }
+    } catch (error) {
+        console.error('Error generating cover letter:', error);
+        res.status(500).json({ 
+            message: "Failed to generate cover letter", 
+            error: process.env.NODE_ENV === 'development' ? error.message : "Server error"
+        });
     }
 };
