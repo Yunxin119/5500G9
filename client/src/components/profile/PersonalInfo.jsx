@@ -105,7 +105,6 @@ export default function PersonalInfo({ isCurrentUser, user }) {
             )}
             </div>
             <motion.p 
-            className="mt-1 max-w-2xl text-sm/6 sec-text"
             className="mt-1 max-w-2xl text-sm/6 text-gray-500"
             variants={itemVariants}
             >
@@ -198,7 +197,7 @@ export default function PersonalInfo({ isCurrentUser, user }) {
                 </motion.div>
             )}
 
-            <motion.div 
+            {/* <motion.div 
                 className="px-4 py-6 sm:grid sm:grid-cols-4 sm:gap-2 sm:px-6"
                 variants={itemVariants}
             >
@@ -206,7 +205,7 @@ export default function PersonalInfo({ isCurrentUser, user }) {
                 <dd className="mt-1 text-sm sec-text sm:col-span-2">
                 {user.about || 'No information provided'}
                 </dd>
-            </motion.div>
+            </motion.div> */}
             </dl>
         </div>
         </motion.div>
