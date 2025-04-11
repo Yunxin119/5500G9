@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
+import { useGetCompanyByUserIdQuery } from "../../redux/companyApiSlice";
 const Stats = ({ user, isCurrentUser }) => {
     const containerVariants = {
       hidden: { opacity: 0, y: 20 },
@@ -23,14 +24,21 @@ const Stats = ({ user, isCurrentUser }) => {
     }
   };
 
+  const { data: companies, isLoading }= useGetCompanyByUserIdQuery(user._id, {
+    skip: !user._id
+  });
+
+  console.log(companies);
+
   const statsData = [
-    { label: "OA", value: 1 },
-    { label: "Interview", value: 1 },
-    { label: "Rejected", value: 2 },
-    { label: "Offer", value: 0 }
+    { label: "OA", value: companies?.filter((company) => company.status === "OA").length },
+    { label: "Interview", value: companies?.filter((company) => company.status === "Interview1" ).length + companies?.filter((company) => company.status === "Interview2" ).length + companies?.filter((company) => company.status === "Interview3" ).length },
+    { label: "Rejected", value: companies?.filter((company) => company.status === "Rejected").length },
   ];
 
-  const validCompanies = 10;
+
+  const validCompanies = user.applications.length;
+  console.log(validCompanies);
 
   return (
     <motion.div

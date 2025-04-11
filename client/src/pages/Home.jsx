@@ -57,7 +57,7 @@ const Home = () => {
         >
           <div className="text-center">
             <motion.h1 
-              className="text-balance text-5xl lg:text-7xl font-semibold tracking-tight text-gray-900 dark:text-gray-200 sm:text-5xl"
+              className="text-balance text-5xl lg:text-7xl font-semibold tracking-tight text-gray-900 dark:text-gray-300 sm:text-5xl"
               variants={itemVariants}
             >
               Keep track of every application
@@ -67,7 +67,7 @@ const Home = () => {
               className="mt-8 text-pretty text-lg font-medium text-gray-800 dark:text-gray-300 text-opacity-80 sm:text-lg"
               variants={itemVariants}
             >
-              It's never been easier to keep track of your job applications. With OfferHunter, 
+              It's never been easier to keep track of your job applications. With JobHunter, 
               you can keep track of every job you apply to, every interview you have, and every 
               offer you receive.
             </motion.p>

@@ -56,8 +56,7 @@ const InfoInput = ({ setResume, setJd, setPdfText }) => {
   };
 
   const handleFile = async (file) => {
-    if (file && (file.type === 'application/pdf' || file.type === 'application/msword' || 
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+    if (file && (file.type === 'application/pdf')) {
       setUploadedFile(file);
       setIsUploading(true);
       
@@ -88,7 +87,7 @@ const InfoInput = ({ setResume, setJd, setPdfText }) => {
         setIsUploading(false);
       }
     } else {
-      toast.error('Please upload a PDF or Word document');
+      toast.error('Please upload a PDF document');
     }
   };
 
@@ -145,7 +144,7 @@ const InfoInput = ({ setResume, setJd, setPdfText }) => {
               ref={fileInputRef}
               onChange={handleFileInput}
               className="hidden"
-              accept=".pdf,.doc,.docx"
+              accept=".pdf"
             />
             
             {!uploadedFile ? (
@@ -161,7 +160,7 @@ const InfoInput = ({ setResume, setJd, setPdfText }) => {
                   </button>
                 </p>
                 <p className="sec-text text-xs">
-                  Supports PDF, DOC, DOCX
+                  Supports PDF
                 </p>
               </div>
             ) : (
